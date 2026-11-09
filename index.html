@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#edf1f8">
+<meta name="color-scheme" content="light dark">
+<title>OneSecondPrice — прайс в одно касание</title>
+<style>
+:root {
+    --ink: #20293e; --muted: #69758c; --faint: #8490a5;
+    --line: rgba(75, 93, 129, .12); --glass: rgba(255, 255, 255, .58);
+    --glass-strong: rgba(255, 255, 255, .75); --well: rgba(247, 249, 253, .56);
+    --accent: #365eee; --accent-ink: #3158d5; --accent-soft: rgba(64, 101, 238, .08);
+    --shadow: 0 12px 50px -20px rgba(48, 65, 110, .16), inset 0 1px 0 rgba(255,255,255,.95);
+    --radius: 28px; --body-bg: #edf1f8;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--ink); background: var(--body-bg); -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0; z-index: -2; background: radial-gradient(ellipse at 5% 10%, #d9e7ff 0, transparent 49%), radial-gradient(ellipse at 94% 35%, #e2dcfa 0, transparent 47%), radial-gradient(ellipse at 65% 100%, #f9e6d9 0, transparent 55%), #edf1f8; }
+.ambient { position: fixed; z-index: -1; pointer-events: none; border-radius: 50%; filter: blur(12px); }
+.ambient-one { width: 340px; height: 340px; left: -210px; top: 240px; border: 65px solid rgba(166,197,255,.16); transform: rotate(-24deg); }
+.ambient-two { width: 390px; height: 390px; right: -240px; top: 400px; border: 75px solid rgba(181,158,244,.1); }
+button, input, textarea { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; cursor: pointer; }
+button, a, input, textarea { outline: none; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid #7796ff; outline-offset: 4px; }
+button { color: inherit; }
+button:disabled { cursor: default; opacity: .33; }
+button:not(:disabled), a { transition: background .18s ease, box-shadow .18s ease, transform .18s ease, color .18s ease; }
+button:not(:disabled):active { transform: scale(.975); }
+svg { width: 20px; height: 20px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.65; stroke-linecap: round; stroke-linejoin: round; }
+[hidden] { display: none !important; }
+.glass { background: var(--glass); border: 1px solid rgba(255,255,255,.9); border-radius: var(--radius); box-shadow: var(--shadow); -webkit-backdrop-filter: blur(28px) saturate(155%); backdrop-filter: blur(28px) saturate(155%); }
+.shell { max-width: 1260px; margin: 0 auto; padding: 0 36px 26px; }
+.topbar { height: 106px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark { position: relative; width: 45px; height: 45px; display: grid; place-items: center; border-radius: 15px; background: linear-gradient(145deg, #8da8ff, #466be8 65%, #3152cd); box-shadow: inset 0 1px 1px #dfe9ff, 0 5px 15px #5b79d52b; color: white; }
+.brand-mark svg { width: 26px; height: 26px; stroke-width: 1.8; }
+.brand-name { font-size: 19px; font-weight: 700; letter-spacing: -.75px; }
+.brand-name span { font-weight: 400; color: var(--muted); }
+.brand-caption { font-size: 9px; font-weight: 650; letter-spacing: 2.8px; color: var(--muted); margin-top: 5px; }
+.top-actions { display: flex; align-items: center; gap: 20px; }
+.privacy { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; }
+.privacy svg { width: 15px; height: 15px; color: #627f8b; }
+.icon-button { display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 11px; background: transparent; color: var(--muted); }
+.icon-button:not(:disabled):hover { background: var(--accent-soft); color: var(--accent-ink); }
+.theme-button { width: 40px; height: 40px; background: var(--glass); border: 1px solid rgba(255,255,255,.8); border-radius: 50%; box-shadow: 0 3px 9px #53618b08; }
+.intro { padding: 38px 0 28px; display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+.eyebrow { margin: 0 0 11px; font-size: 10px; letter-spacing: 2.1px; font-weight: 650; color: var(--faint); }
+h1 { margin: 0; font-size: clamp(28px, 3.1vw, 39px); font-weight: 600; line-height: 1.2; letter-spacing: -1.5px; }
+.intro-description { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 12px 0 0; }
+.session-indicator { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 3px; padding: 8px 12px; border: 1px solid rgba(255,255,255,.75); background: rgba(255,255,255,.32); border-radius: 30px; color: var(--muted); font-size: 11px; white-space: nowrap; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: #4d9d84; box-shadow: 0 0 0 3px #72bca015; }
+.workspace { display: grid; grid-template-columns: minmax(0, 1fr) 306px; gap: 18px; align-items: stretch; }
+.editor { display: flex; flex-direction: column; min-width: 0; overflow: hidden; position: relative; }
+.editor-header { padding: 20px 22px 17px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.tabs { display: flex; align-items: center; padding: 4px; border-radius: 13px; background: rgba(108,128,162,.07); border: 1px solid rgba(105,127,165,.035); }
+.tab { padding: 8px 17px; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font-size: 12px; font-weight: 550; }
+.tab[aria-selected="true"] { background: var(--glass-strong); color: var(--ink); box-shadow: 0 2px 5px #253c6420, inset 0 1px 0 white; }
+.editor-actions { display: flex; align-items: center; gap: 1px; }
+.toolbar-divider { height: 18px; width: 1px; background: var(--line); margin: 0 7px; }
+.editor-meta { display: flex; align-items: center; justify-content: space-between; padding: 0 25px 13px; gap: 10px; }
+.document-label { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 550; color: var(--muted); }
+.document-label svg { width: 14px; height: 14px; }
+.editor-meta > span { font-size: 10px; color: var(--faint); }
+.editor-well { position: relative; flex: 1; min-height: 397px; margin: 0 14px; background: var(--well); border: 1px solid rgba(117,138,171,.08); border-radius: 17px; box-shadow: inset 0 2px 8px #4b608004; }
+.editor-well:focus-within { border-color: rgba(86,119,231,.32); }
+textarea { display: block; width: 100%; height: 100%; min-height: 397px; resize: vertical; padding: 25px 22px; background: transparent; color: var(--ink); border: none; border-radius: 17px; line-height: 1.95; font-size: 13px; font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace; tab-size: 4; }
+textarea:focus-visible { outline: none; }
+textarea::placeholder { color: var(--faint); }
+#outputText { margin: 0; padding: 25px 22px; min-height: 397px; max-height: 630px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ink); font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 13px; line-height: 1.95; }
+.preview-placeholder { display: grid; place-content: center; text-align: center; min-height: 397px; color: var(--muted); font-size: 13px; line-height: 1.7; padding: 25px; }
+.empty-state { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: none; padding: 20px; }
+.paper-art { width: 80px; height: 89px; margin: 0 0 24px; position: relative; }
+.paper-back { position: absolute; width: 57px; height: 70px; top: 0; left: 15px; transform: rotate(12deg); border: 1px solid rgba(255,255,255,.9); border-radius: 13px; background: linear-gradient(160deg, #d9e4ff99, #e5e6f080); box-shadow: 0 7px 18px #526aab0a; }
+.paper-front { position: absolute; width: 57px; height: 70px; top: 6px; left: 6px; transform: rotate(-8deg); border: 1px solid rgba(255,255,255,.95); border-radius: 13px; background: linear-gradient(130deg, #ffffffd9, #f0f4ffb3); box-shadow: 0 7px 18px #526aab15, inset 0 1px 0 #fff; padding: 17px 11px; }
+.paper-front i { display: block; height: 3px; margin-bottom: 7px; border-radius: 3px; background: #adc0ec; }
+.paper-front i:first-child { width: 16px; background: #7293e5; }
+.paper-front i:last-child { width: 20px; }
+.paper-badge { position: absolute; right: 0; bottom: 5px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(140deg, #a5bcff, #5d80ec); color: white; box-shadow: 0 2px 8px #6286d42b; border: 1px solid #e2eaff; }
+.paper-badge svg { width: 14px; height: 14px; stroke-width: 2; }
+.empty-state h2 { margin: 0 0 9px; font-size: 19px; font-weight: 550; letter-spacing: -.55px; }
+.empty-state p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.8; }
+.empty-state button { pointer-events: auto; }
+.paste-button { margin-top: 22px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,.95); background: var(--glass-strong); border-radius: 12px; box-shadow: 0 3px 9px #5363900b; padding: 11px 17px; font-size: 12px; font-weight: 600; color: var(--accent-ink); }
+.paste-button:hover { background: white; box-shadow: 0 4px 13px #53639015; }
+.paste-button svg { width: 16px; height: 16px; }
+.demo-button { background: none; border: none; padding: 10px; margin-top: 4px; font-size: 11px; color: var(--muted); text-decoration: underline; text-decoration-color: #a4b0c24d; text-underline-offset: 4px; }
+.demo-button:hover { color: var(--accent-ink); }
+.drag-over .editor-well { border: 2px dashed var(--accent); background: var(--accent-soft); }
+.editor-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 16px 25px 18px; font-size: 10px; color: var(--faint); }
+.live-label { display: inline-flex; align-items: center; gap: 6px; }
+.live-label svg { width: 12px; height: 12px; }
+.counts { display: flex; gap: 11px; }
+.counts b { font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tools { padding: 23px 20px 20px; }
+.tools-heading { display: flex; align-items: center; justify-content: space-between; padding: 0 3px 20px; }
+.tools-heading h2 { font-size: 15px; font-weight: 600; letter-spacing: -.3px; margin: 0; }
+.tools-heading svg { color: var(--faint); width: 17px; height: 17px; }
+.section-heading { display: flex; align-items: center; gap: 8px; margin: 0 3px 12px; font-size: 10px; font-weight: 600; letter-spacing: .6px; color: var(--muted); }
+.section-number { font-size: 9px; display: grid; place-items: center; width: 18px; height: 18px; border: 1px solid var(--line); border-radius: 6px; color: var(--faint); letter-spacing: 0; }
+.tool-button { display: flex; width: 100%; align-items: center; gap: 12px; text-align: left; padding: 12px 10px; border: 1px solid transparent; border-radius: 13px; background: transparent; }
+.tool-button:not(:disabled):hover { background: var(--glass-strong); border-color: rgba(255,255,255,.85); box-shadow: 0 3px 12px #4b609b08; }
+.tool-icon { display: grid; place-items: center; width: 36px; height: 36px; flex-shrink: 0; border-radius: 11px; background: rgba(255,255,255,.62); border: 1px solid rgba(255,255,255,.9); color: #637aa9; box-shadow: 0 2px 6px #3b528f06; }
+.tool-icon svg { width: 18px; height: 18px; }
+.tool-text { flex: 1; min-width: 0; }
+.tool-name { display: block; font-size: 12px; font-weight: 550; letter-spacing: -.1px; }
+.tool-caption { display: block; font-size: 10px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+.chevron { width: 13px; height: 13px; color: var(--faint); }
+.section-separator { height: 1px; background: var(--line); margin: 18px 3px; }
+.price-controls { margin: 12px 2px 0; }
+.input-label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 9px; }
+.percent-control { display: flex; align-items: center; border-radius: 13px; padding: 5px; border: 1px solid rgba(255,255,255,.95); background: rgba(255,255,255,.55); box-shadow: inset 0 2px 5px #4b608006; }
+.stepper { width: 32px; height: 32px; display: grid; place-items: center; border: none; border-radius: 9px; background: rgba(126,144,180,.06); color: var(--muted); }
+.stepper:hover { background: var(--accent-soft); color: var(--accent-ink); }
+.stepper svg { width: 15px; height: 15px; }
+.percent-value { flex: 1; display: flex; justify-content: center; align-items: center; gap: 3px; }
+#increasePercent { width: 56px; max-width: 80px; padding: 2px; border: 0; background: transparent; text-align: center; font-size: 21px; font-weight: 500; letter-spacing: -.5px; color: var(--ink); appearance: textfield; -moz-appearance: textfield; }
+#increasePercent::-webkit-inner-spin-button, #increasePercent::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.percent-value > span { color: var(--faint); font-size: 14px; }
+.quick-percent { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 9px 0 13px; }
+.quick-percent button { border: 1px solid var(--line); background: transparent; border-radius: 8px; padding: 7px 0; font-size: 10px; color: var(--muted); }
+.quick-percent button:hover, .quick-percent button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-ink); border-color: rgba(64,101,238,.19); }
+.primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid rgba(255,255,255,.25); border-radius: 13px; padding: 12px 19px; background: linear-gradient(180deg, #6786f5 0%, #466bea 45%, #3d60de 100%); color: white; font-size: 12px; font-weight: 550; box-shadow: inset 0 1px 0 #aec1ff88, 0 4px 12px #4164d826; text-shadow: 0 1px 1px #304cb533; }
+.primary-button:not(:disabled):hover { box-shadow: inset 0 1px 0 #aec1ff88, 0 5px 18px #4164d83b; background: linear-gradient(180deg, #7390fb, #4a6fea 60%, #3d60de); }
+.apply-button { width: 100%; }
+.apply-button svg { margin-left: auto; width: 17px; height: 17px; }
+.rounding-note { display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 9px; color: var(--muted); margin: 10px 0 0; }
+.rounding-note svg { width: 11px; height: 11px; }
+.cleanup-button { display: flex; align-items: center; gap: 7px; justify-content: center; width: 100%; border: none; background: transparent; padding: 13px 8px 0; color: var(--muted); font-size: 11px; }
+.cleanup-button svg { width: 14px; height: 14px; }
+.cleanup-button:hover { color: var(--accent-ink); }
+.action-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 18px; padding: 15px 20px 15px 24px; border-radius: 21px; position: sticky; bottom: 16px; z-index: 5; }
+.action-info { display: flex; align-items: center; gap: 10px; }
+.ready-icon { width: 30px; height: 30px; border-radius: 50%; background: #76a29a0d; color: #6a9289; display: grid; place-items: center; border: 1px solid #91b2a61a; }
+.ready-icon svg { width: 15px; height: 15px; }
+.action-title { font-size: 11px; font-weight: 550; }
+.action-subtitle { margin-top: 4px; font-size: 10px; color: var(--muted); }
+.export-actions { display: flex; align-items: center; gap: 9px; }
+.secondary-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--line); background: rgba(255,255,255,.3); padding: 11px 15px; border-radius: 12px; font-size: 11px; color: var(--muted); }
+.secondary-button:not(:disabled):hover { background: var(--glass-strong); color: var(--ink); }
+.secondary-button svg, .copy-button svg { width: 16px; height: 16px; }
+.copy-button { min-width: 175px; }
+.page-footer { display: flex; align-items: center; justify-content: space-between; padding: 20px 4px 0; color: var(--faint); font-size: 9px; letter-spacing: .1px; }
+.footer-wordmark { letter-spacing: 1.5px; font-size: 8px; font-weight: 600; }
+.toast { position: fixed; bottom: 110px; left: 50%; transform: translate(-50%, 12px); opacity: 0; pointer-events: none; padding: 13px 20px; max-width: calc(100vw - 32px); border: 1px solid rgba(255,255,255,.8); border-radius: 15px; background: rgba(35,46,69,.92); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); color: #fff; box-shadow: 0 8px 30px #1b294326; font-size: 12px; line-height: 1.5; text-align: center; z-index: 20; transition: opacity .2s, transform .2s; }
+.toast.visible { opacity: 1; transform: translate(-50%, 0); }
+[data-theme="dark"] { --ink: #edf0fa; --muted: #b0b9d0; --faint: #8f9bb6; --line: rgba(172,186,222,.15); --glass: rgba(33,42,65,.66); --glass-strong: rgba(62,74,103,.75); --well: rgba(15,25,44,.38); --accent-ink: #b3c6ff; --accent-soft: rgba(124,153,255,.14); --body-bg: #151d30; --shadow: 0 12px 50px -20px rgba(3,9,25,.4), inset 0 1px 0 rgba(255,255,255,.07); }
+[data-theme="dark"] body::before { background: radial-gradient(ellipse at 5% 10%, #263c66 0, transparent 49%), radial-gradient(ellipse at 94% 35%, #352c54 0, transparent 47%), radial-gradient(ellipse at 65% 100%, #3a2e36 0, transparent 55%), #151d30; }
+[data-theme="dark"] .glass, [data-theme="dark"] .theme-button { border-color: rgba(193,207,249,.13); }
+[data-theme="dark"] .session-indicator, [data-theme="dark"] .percent-control { background: rgba(155,178,230,.06); border-color: rgba(193,207,249,.12); }
+[data-theme="dark"] .tab[aria-selected="true"] { box-shadow: 0 2px 5px #0002, inset 0 1px 0 #ffffff12; }
+[data-theme="dark"] .tool-icon { background: rgba(160,180,230,.08); border-color: rgba(193,207,249,.12); color: #9eb3e1; }
+[data-theme="dark"] .tool-button:hover { border-color: rgba(193,207,249,.13); }
+[data-theme="dark"] .paste-button { border-color: rgba(193,207,249,.13); }
+[data-theme="dark"] .paste-button:hover { background: rgba(100,123,178,.25); }
+[data-theme="dark"] .secondary-button { background: rgba(155,178,230,.04); }
+[data-theme="dark"] .paper-front { background: linear-gradient(130deg, #667da499, #394a6eb3); border-color: #9eb8e233; }
+[data-theme="dark"] .paper-back { background: #7285bd24; border-color: #9eb8e233; }
+@media (min-width: 1450px) { .shell { padding-top: 14px; } .intro { padding-top: 45px; padding-bottom: 34px; } .editor-well, textarea, #outputText, .preview-placeholder { min-height: 445px; } }
+@media (max-width: 960px) { .shell { padding: 0 24px 24px; } .workspace { grid-template-columns: minmax(0, 1fr) 280px; gap: 14px; } .tools { padding-left: 15px; padding-right: 15px; } .editor-header { padding: 18px 14px; } .tab { padding-left: 12px; padding-right: 12px; } .editor-actions { gap: 0; } .icon-button { width: 31px; height: 34px; } .toolbar-divider { margin: 0 3px; } .intro h1 { font-size: 32px; } .session-indicator { display: none; } .privacy { font-size: 11px; } }
+@media (max-width: 720px) { .shell { padding: 0 16px calc(22px + env(safe-area-inset-bottom)); } .topbar { height: 83px; } .brand-mark { width: 39px; height: 39px; border-radius: 13px; } .brand-name { font-size: 17px; } .brand-caption { font-size: 8px; letter-spacing: 2.2px; } .privacy { display: none; } .top-actions { gap: 8px; } .theme-button { width: 37px; height: 37px; } .intro { padding: 28px 3px 23px; } .eyebrow { font-size: 9px; letter-spacing: 1.6px; margin-bottom: 10px; } .intro h1 { font-size: 30px; letter-spacing: -1.1px; max-width: 310px; line-height: 1.17; } .intro-description { font-size: 12px; max-width: 300px; margin-top: 10px; } .workspace { grid-template-columns: 1fr; gap: 14px; } .glass { --radius: 23px; } .editor-header { padding: 15px 14px; } .editor-actions .icon-button { width: 30px; } .toolbar-divider { margin: 0 2px; } .tab { padding: 8px 12px; font-size: 11px; } .editor-meta { padding: 0 20px 12px; } .editor-meta > span { font-size: 9px; } .editor-well { margin: 0 10px; min-height: 322px; } textarea, #outputText, .preview-placeholder { min-height: 322px; font-size: 12px; padding: 19px 15px; } textarea { font-size: 16px; line-height: 1.8; } .empty-state h2 { font-size: 18px; } .empty-state p { font-size: 11px; } .paper-art { margin-bottom: 19px; } .editor-footer { padding: 14px 18px 16px; font-size: 9px; } .counts { gap: 8px; } .tools { padding: 21px 18px; } .tools-heading { padding-bottom: 20px; } .tool-button { padding: 11px 10px; } .tool-name { font-size: 13px; } .tool-caption { font-size: 11px; } .tool-icon { width: 39px; height: 39px; } .tools-heading h2 { font-size: 15px; } .section-heading { font-size: 11px; } .percent-control { padding: 6px; } .quick-percent button { font-size: 11px; padding: 9px 0; } .apply-button { padding: 14px 19px; font-size: 13px; } .rounding-note { font-size: 10px; } .cleanup-button { font-size: 12px; padding-top: 17px; } .action-bar { bottom: calc(10px + env(safe-area-inset-bottom)); margin-top: 14px; padding: 11px; border-radius: 19px; gap: 7px; } .action-info { display: none; } .export-actions { width: 100%; gap: 8px; } .copy-button { flex: 1; min-width: 0; padding: 13px 10px; font-size: 12px; } .secondary-button { padding: 13px 12px; font-size: 11px; } .page-footer { font-size: 8px; padding-top: 17px; gap: 10px; } .footer-wordmark { font-size: 7px; } }
+@media (max-width: 365px) { .shell { padding-left: 10px; padding-right: 10px; } .editor-header { padding-left: 10px; padding-right: 10px; } .tab { padding-left: 9px; padding-right: 9px; } .editor-actions .icon-button { width: 27px; } .toolbar-divider { display: none; } .editor-meta > span { display: none; } .live-label { font-size: 8px; } .counts { font-size: 8px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
+@supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) { .glass { background: #f6f8fd; } [data-theme="dark"] .glass { background: #232d45; } }
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none">
+<symbol id="i-brand" viewBox="0 0 24 24"><path d="M13 3 5 13h6l-1 8 9-11h-6l1-7Z"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 13.4A8.8 8.8 0 0 1 10.6 3.5a8.8 8.8 0 1 0 9.9 9.9Z"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6M8 13h8m-8 4h5"/></symbol>
+<symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="4" rx="1.5"/><path d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M8 12h8m-8 4h5"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V3m-4 4 4-4 4 4M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24"><path d="m9 4-5 5 5 5M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
+<symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 4 5 5-5 5m5-5H10a6 6 0 0 0 0 12h3"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></symbol>
+<symbol id="i-sparkle" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/><path d="m20 2 .5 1.5L22 4l-1.5.5L20 6l-.5-1.5L18 4l1.5-.5L20 2Z"/></symbol>
+<symbol id="i-group" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="6" rx="2"/><rect x="4" y="15" width="16" height="6" rx="2"/><path d="M8 6h5m-5 12h5"/></symbol>
+<symbol id="i-scan" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3M7 9h10M7 15h10m-7-9v12m4-12v12"/></symbol>
+<symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.01"/></symbol>
+<symbol id="i-eraser" viewBox="0 0 24 24"><path d="m14 3 7 7-10 11H6l-4-4L14 3Zm-7 9 7 7m-3 2h10"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="3"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h4m4 0h8M4 17h10m4 0h2"/><circle cx="10" cy="7" r="2"/><circle cx="16" cy="17" r="2"/></symbol>
+</svg>
+<div class="ambient ambient-one" aria-hidden="true"></div><div class="ambient ambient-two" aria-hidden="true"></div>
+<div class="shell">
+    <header class="topbar">
+        <div class="brand"><div class="brand-mark"><svg aria-hidden="true"><use href="#i-brand"/></svg></div><div><div class="brand-name">OneSecond<span>Price</span></div><div class="brand-caption">МЕНЬШЕ РУТИНЫ. БОЛЬШЕ ВРЕМЕНИ.</div></div></div>
+        <div class="top-actions"><span class="privacy"><svg aria-hidden="true"><use href="#i-lock"/></svg>Только на вашем устройстве</span><button class="icon-button theme-button" id="themeToggle" type="button" aria-label="Включить тёмную тему" title="Сменить тему"><svg aria-hidden="true"><use id="themeIcon" href="#i-moon"/></svg></button></div>
+    </header>
+    <main>
+        <section class="intro" aria-labelledby="pageTitle"><div><p class="eyebrow">ВАШЕ РАБОЧЕЕ ПРОСТРАНСТВО</p><h1 id="pageTitle">Прайс, готовый к отправке.</h1><p class="intro-description">Приведите текст в порядок. Обновите цены. Отправляйте.</p></div><div class="session-indicator"><span class="status-dot"></span>Всё готово к работе</div></section>
+        <div class="workspace">
+            <section class="editor glass" id="editor" aria-label="Редактор прайса">
+                <div class="editor-header"><div class="tabs" role="tablist" aria-label="Режим просмотра"><button class="tab" id="editTab" type="button" role="tab" aria-selected="true" aria-controls="editPanel" tabindex="0">Редактор</button><button class="tab" id="previewTab" type="button" role="tab" aria-selected="false" aria-controls="previewPanel" tabindex="-1">Результат</button></div><div class="editor-actions"><button class="icon-button" id="openFileButton" type="button" aria-label="Открыть текстовый файл" title="Открыть .txt"><svg aria-hidden="true"><use href="#i-upload"/></svg></button><span class="toolbar-divider"></span><button class="icon-button" id="undoButton" type="button" aria-label="Отменить действие" title="Отменить · Ctrl Z" disabled><svg aria-hidden="true"><use href="#i-undo"/></svg></button><button class="icon-button" id="redoButton" type="button" aria-label="Повторить действие" title="Повторить · Ctrl Shift Z" disabled><svg aria-hidden="true"><use href="#i-redo"/></svg></button><button class="icon-button" id="clearButton" type="button" aria-label="Очистить прайс" title="Очистить" disabled><svg aria-hidden="true"><use href="#i-trash"/></svg></button></div></div>
+                <div class="editor-meta"><span class="document-label"><svg aria-hidden="true"><use href="#i-file"/></svg><span id="documentLabel">Ваш прайс</span></span><span id="editorHint">Текст можно редактировать</span></div>
+                <div class="editor-well">
+                    <div id="editPanel" role="tabpanel" aria-labelledby="editTab"><label for="inputText" hidden>Текст прайса</label><textarea id="inputText" aria-label="Текст прайса" spellcheck="false"></textarea><div class="empty-state" id="emptyState"><div class="paper-art" aria-hidden="true"><div class="paper-back"></div><div class="paper-front"><i></i><i></i><i></i><i></i></div><div class="paper-badge"><svg><use href="#i-plus"/></svg></div></div><h2>Начните с вашего прайса</h2><p>Вставьте текст или перетащите .txt файл.<br>Всё остальное — в пару касаний.</p><button class="paste-button" id="pasteButton" type="button"><svg aria-hidden="true"><use href="#i-clipboard"/></svg>Вставить из буфера</button><button class="demo-button" id="demoButton" type="button">Попробовать на примере</button></div></div>
+                    <div id="previewPanel" role="tabpanel" aria-labelledby="previewTab" hidden><div class="preview-placeholder" id="previewPlaceholder">Здесь появится ваш готовый прайс.<br>Добавьте текст в редактор.</div><pre id="outputText" tabindex="0" aria-label="Результат обработки" hidden></pre></div>
+                </div>
+                <div class="editor-footer"><span class="live-label"><svg aria-hidden="true"><use href="#i-check"/></svg><span id="editStatus">Можно начинать</span></span><div class="counts"><span><b id="lineCount">0</b> строк</span><span><b id="modelCount">0</b> моделей</span></div></div>
+            </section>
+            <aside class="tools glass" aria-labelledby="toolsTitle">
+                <div class="tools-heading"><h2 id="toolsTitle">Инструменты</h2><svg aria-hidden="true"><use href="#i-sliders"/></svg></div>
+                <div class="section-heading"><span class="section-number">01</span>ПОДГОТОВКА</div>
+                <button class="tool-button" type="button" data-operation="formatText"><span class="tool-icon"><svg aria-hidden="true"><use href="#i-sparkle"/></svg></span><span class="tool-text"><span class="tool-name">Apple прайсы</span><span class="tool-caption">Очистить и объединить строки</span></span><svg class="chevron" aria-hidden="true"><use href="#i-chevron"/></svg></button>
+                <button class="tool-button" type="button" data-operation="groupByModel"><span class="tool-icon"><svg aria-hidden="true"><use href="#i-group"/></svg></span><span class="tool-text"><span class="tool-name">Разбить по моделям</span><span class="tool-caption">Пустая строка между группами</span></span><svg class="chevron" aria-hidden="true"><use href="#i-chevron"/></svg></button>
+                <div class="section-separator"></div>
+                <div class="section-heading"><span class="section-number">02</span>ЦЕНЫ</div>
+                <button class="tool-button" type="button" data-operation="addDotsToLastNumber"><span class="tool-icon"><svg aria-hidden="true"><use href="#i-scan"/></svg></span><span class="tool-text"><span class="tool-name">Определить цены</span><span class="tool-caption">Отметить перед изменением</span></span><svg class="chevron" aria-hidden="true"><use href="#i-chevron"/></svg></button>
+                <div class="price-controls"><label class="input-label" for="increasePercent">Увеличить цены на</label><div class="percent-control"><button class="stepper" id="decreasePercent" type="button" aria-label="Уменьшить процент на один"><svg aria-hidden="true"><use href="#i-minus"/></svg></button><div class="percent-value"><input type="number" id="increasePercent" value="10" min="0" step="1" inputmode="decimal"><span aria-hidden="true">%</span></div><button class="stepper" id="addPercent" type="button" aria-label="Увеличить процент на один"><svg aria-hidden="true"><use href="#i-plus"/></svg></button></div><div class="quick-percent" aria-label="Быстрый выбор наценки"><button type="button" data-percent="5" aria-pressed="false">5%</button><button type="button" data-percent="10" aria-pressed="true">10%</button><button type="button" data-percent="15" aria-pressed="false">15%</button><button type="button" data-percent="20" aria-pressed="false">20%</button></div><button class="primary-button apply-button" type="button" data-operation="increasePrices">Изменить цены<svg aria-hidden="true"><use href="#i-arrow"/></svg></button><p class="rounding-note"><svg aria-hidden="true"><use href="#i-info"/></svg>Округление вверх до 100 ₽</p></div>
+                <button class="cleanup-button" type="button" data-operation="removeDots" title="Удалить все точки из текста"><svg aria-hidden="true"><use href="#i-eraser"/></svg>Удалить все точки</button>
+            </aside>
+        </div>
+        <div class="action-bar glass"><div class="action-info"><div class="ready-icon"><svg aria-hidden="true"><use href="#i-check"/></svg></div><div><div class="action-title" id="readyTitle">От текста до готового прайса</div><div class="action-subtitle" id="readySubtitle">Все изменения остаются в браузере</div></div></div><div class="export-actions"><button class="secondary-button" id="pasteToolbarButton" type="button" title="Вставить из буфера обмена"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span>Вставить</span></button><button class="secondary-button" id="downloadButton" type="button" disabled><svg aria-hidden="true"><use href="#i-download"/></svg><span>.txt</span></button><button class="primary-button copy-button" id="copyButton" type="button" disabled><svg aria-hidden="true"><use href="#i-copy"/></svg>Копировать прайс</button></div></div>
+    </main>
+    <footer class="page-footer"><span class="footer-wordmark">ONE SECOND. ALL SET.</span><span>Ваши данные не отправляются на сервер</span></footer>
+</div>
+<input type="file" id="fileInput" accept=".txt,text/plain" hidden>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+<script>
+function formatText(text) {
+    const lines = text
+        .replace(/от \d+шт\. -> /g, '')
+        .replace(/0шт\. -> /g, '')
+        .replace(/ руб\./g, '')
+        .trim()
+        .split('\n');
+    let formattedText = '';
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i] && !isNaN(lines[i + 1])) {
+            formattedText += lines[i] + ' ' + lines[i + 1] + '\n';
+            i++;
+        } else if (lines[i]) {
+            formattedText += lines[i] + '\n';
+        }
+    }
+    return formattedText.trim();
+}
+
+function getModelKey(line) {
+    const normalized = line.normalize('NFKC').replace(/\s+/g, ' ').trim();
+    const iphone = normalized.match(/\biphone\s*(?:\d{1,2}(?:\s*e)?|xs|xr|x|se|air)(?:\s*(?:pro\s*max|pro|plus|mini|max|air))?\b/i);
+    if (iphone) {
+        let key = iphone[0].toLowerCase().replace(/\s+/g, '');
+        if (key === 'iphonese') {
+            const year = normalized.slice(iphone.index + iphone[0].length)
+                .match(/^\s*\(?((?:19|20)\d{2})\)?/);
+            if (year) key += year[1];
+        }
+        return key;
+    }
+
+    // Для других моделей используем название до объёма памяти.
+    const storage = normalized.match(/\b(?:\d+\s*(?:gb|tb|гб|тб)\b|\d+\s*\/\s*\d+\b|(?:32|64|128|256|512|1024|2048)\b)/i);
+    if (storage) {
+        const model = normalized.slice(0, storage.index)
+            .replace(/^[^\p{L}\p{N}]+/u, '').trim();
+        if (/\p{L}/u.test(model)) return model.toLowerCase();
+    }
+
+    return null;
+}
+
+function groupByModel(text) {
+    const groups = new Map();
+    let unknownLine = 0;
+
+    for (const line of text.split(/\r?\n/)) {
+        if (!line.trim()) continue;
+        const model = getModelKey(line);
+        // Не объединяем нераспознанные строки и не удаляем их содержимое.
+        const key = model === null ? 'unknown:' + unknownLine++ : 'model:' + model;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(line);
+    }
+
+    return Array.from(groups.values(), lines => lines.join('\n')).join('\n\n');
+}
+
+function addDotsToLastNumber(text) {
+    return text.split('\n').map(line => {
+        return line.replace(/(\d+)(?![\s\S]*\d)/, '.$1.');
+    }).join('\n');
+}
+
+function findNumbersBetweenDots(text) {
+    const regex = /(?<=\.)\d+(?=\.)/g;
+    return text.match(regex) || [];
+}
+
+function increasePrices(text, increasePercent) {
+    const regex = /(?<=\.)\d+\b(?=\.)/g;
+    return text.replace(regex, (match) => {
+        let updatedPrice = Math.ceil(parseInt(match) * (1 + increasePercent / 100));
+        updatedPrice = Math.ceil(updatedPrice / 100) * 100;
+        return updatedPrice;
+    });
+}
+
+
+
+const $ = id => document.getElementById(id);
+const undoStack = [];
+const redoStack = [];
+let lastText = '';
+let lastTypingTime = 0;
+let toastTimer;
+let activeTab = 'edit';
+
+function notify(message) {
+    clearTimeout(toastTimer);
+    $('toast').textContent = message;
+    $('toast').classList.add('visible');
+    toastTimer = setTimeout(() => $('toast').classList.remove('visible'), 3200);
+}
+function setTab(tab, focus = false) {
+    activeTab = tab;
+    const edit = tab === 'edit';
+    $('editPanel').hidden = !edit;
+    $('previewPanel').hidden = edit;
+    $('editTab').setAttribute('aria-selected', String(edit));
+    $('previewTab').setAttribute('aria-selected', String(!edit));
+    $('editTab').tabIndex = edit ? 0 : -1;
+    $('previewTab').tabIndex = edit ? -1 : 0;
+    $('editorHint').textContent = edit ? 'Текст можно редактировать' : 'Именно этот текст будет скопирован';
+    if (focus) $(edit ? 'editTab' : 'previewTab').focus();
+}
+function updateUI(status) {
+    const text = $('inputText').value;
+    const hasText = Boolean(text.trim());
+    $('emptyState').hidden = Boolean(text.length);
+    $('outputText').textContent = text;
+    $('outputText').hidden = !hasText;
+    $('previewPlaceholder').hidden = hasText;
+    const lines = text.split(/\r?\n/).filter(line => line.trim());
+    $('lineCount').textContent = lines.length;
+    $('modelCount').textContent = new Set(lines.map(getModelKey).filter(Boolean)).size;
+    $('undoButton').disabled = !undoStack.length;
+    $('redoButton').disabled = !redoStack.length;
+    $('clearButton').disabled = !text.length;
+    $('copyButton').disabled = !hasText;
+    $('downloadButton').disabled = !hasText;
+    $('editStatus').textContent = status || (hasText ? 'Изменения применены' : 'Можно начинать');
+    $('readyTitle').textContent = hasText ? 'Ваш прайс под рукой' : 'От текста до готового прайса';
+    $('readySubtitle').textContent = hasText ? 'Скопируйте или сохраните текстовым файлом' : 'Все изменения остаются в браузере';
+}
+function remember(text) {
+    undoStack.push(text);
+    if (undoStack.length > 60) undoStack.shift();
+    redoStack.length = 0;
+}
+function commitText(text, status) {
+    if (text !== $('inputText').value) remember($('inputText').value);
+    $('inputText').value = text;
+    lastText = text;
+    lastTypingTime = 0;
+    updateUI(status);
+}
+function processText(operationName) {
+    const inputText = $('inputText').value;
+    if (!inputText.trim()) { notify('Сначала добавьте прайс в редактор'); return; }
+    const increasePercent = parseFloat($('increasePercent').value) || 0;
+    let updatedText;
+    const messages = {
+        formatText: 'Apple прайс отформатирован',
+        groupByModel: 'Товары сгруппированы по моделям',
+        addDotsToLastNumber: 'Цены отмечены точками',
+        increasePrices: 'Цены обновлены',
+        removeDots: 'Все точки удалены'
+    };
+    switch(operationName) {
+        case 'formatText': updatedText = formatText(inputText); break;
+        case 'groupByModel': updatedText = groupByModel(inputText); break;
+        case 'addDotsToLastNumber': updatedText = addDotsToLastNumber(inputText); break;
+        case 'increasePrices': updatedText = increasePrices(inputText, increasePercent); break;
+        case 'removeDots': updatedText = inputText.replace(/\./g, ''); break;
+        default: return;
+    }
+    const changed = updatedText !== inputText;
+    commitText(updatedText, changed ? messages[operationName] : 'Текст без изменений');
+    if (operationName === 'increasePrices' && !findNumbersBetweenDots(inputText).length) {
+        notify('Сначала нажмите «Определить цены»');
+    } else {
+        notify(changed ? messages[operationName] : 'Готово — текст не требует изменений');
+    }
+}
+function undo() {
+    if (!undoStack.length) return;
+    redoStack.push($('inputText').value);
+    $('inputText').value = undoStack.pop();
+    lastText = $('inputText').value;
+    lastTypingTime = 0;
+    updateUI('Последнее действие отменено');
+}
+function redo() {
+    if (!redoStack.length) return;
+    undoStack.push($('inputText').value);
+    $('inputText').value = redoStack.pop();
+    lastText = $('inputText').value;
+    lastTypingTime = 0;
+    updateUI('Действие повторено');
+}
+async function copyToClipboard() {
+    const text = $('inputText').value;
+    if (!text.trim()) return;
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+        } else {
+            const temporary = document.createElement('textarea');
+            temporary.value = text;
+            temporary.style.cssText = 'position:fixed;top:0;left:-9999px';
+            document.body.appendChild(temporary);
+            temporary.select();
+            const copied = document.execCommand('copy');
+            temporary.remove();
+            if (!copied) throw new Error('Clipboard unavailable');
+        }
+        notify('Прайс скопирован. Можно отправлять!');
+    } catch {
+        setTab('edit'); $('inputText').focus(); $('inputText').select();
+        notify('Текст выделен. Нажмите «Копировать» в меню устройства');
+    }
+}
+async function pasteFromClipboard() {
+    try {
+        if (!navigator.clipboard || !window.isSecureContext) throw new Error('Clipboard unavailable');
+        const text = await navigator.clipboard.readText();
+        if (!text) { notify('В буфере обмена пока пусто'); return; }
+        commitText(text, 'Текст вставлен');
+        setTab('edit');
+        notify('Прайс вставлен');
+    } catch {
+        setTab('edit'); $('inputText').focus();
+        notify('Вставьте текст через Ctrl V или меню «Вставить»');
+    }
+}
+function setPercent(value) {
+    $('increasePercent').value = Math.max(0, value);
+    updatePercentButtons();
+}
+function updatePercentButtons() {
+    document.querySelectorAll('[data-percent]').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.percent === $('increasePercent').value));
+    });
+}
+async function importFile(file) {
+    if (!file) return;
+    if (!/\.txt$/i.test(file.name) && file.type !== 'text/plain') {
+        notify('Выберите текстовый файл .txt'); return;
+    }
+    try {
+        const text = await file.text();
+        commitText(text, 'Файл открыт');
+        $('documentLabel').textContent = file.name;
+        setTab('edit'); notify('Прайс загружен из файла');
+    } catch { notify('Не удалось прочитать файл. Попробуйте вставить текст'); }
+}
+$('inputText').addEventListener('input', () => {
+    const now = Date.now();
+    if (!lastTypingTime || now - lastTypingTime > 700) remember(lastText);
+    else redoStack.length = 0;
+    lastTypingTime = now;
+    lastText = $('inputText').value;
+    updateUI('Редактирование');
+});
+$('inputText').addEventListener('blur', () => { lastTypingTime = 0; });
+$('inputText').addEventListener('keydown', event => {
+    if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+    if (event.key.toLowerCase() === 'z') {
+        event.preventDefault(); event.shiftKey ? redo() : undo();
+    } else if (event.key.toLowerCase() === 'y') { event.preventDefault(); redo(); }
+});
+$('editTab').addEventListener('click', () => setTab('edit'));
+$('previewTab').addEventListener('click', () => setTab('preview'));
+document.querySelector('.tabs').addEventListener('keydown', event => {
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault(); setTab(activeTab === 'edit' ? 'preview' : 'edit', true);
+    } else if (event.key === 'Home' || event.key === 'End') {
+        event.preventDefault(); setTab(event.key === 'Home' ? 'edit' : 'preview', true);
+    }
+});
+document.querySelectorAll('[data-operation]').forEach(button => button.addEventListener('click', () => processText(button.dataset.operation)));
+document.querySelectorAll('[data-percent]').forEach(button => button.addEventListener('click', () => setPercent(Number(button.dataset.percent))));
+$('increasePercent').addEventListener('input', updatePercentButtons);
+$('decreasePercent').addEventListener('click', () => setPercent((parseFloat($('increasePercent').value) || 0) - 1));
+$('addPercent').addEventListener('click', () => setPercent((parseFloat($('increasePercent').value) || 0) + 1));
+$('undoButton').addEventListener('click', undo);
+$('redoButton').addEventListener('click', redo);
+$('clearButton').addEventListener('click', () => { commitText('', 'Прайс очищен'); $('documentLabel').textContent = 'Ваш прайс'; setTab('edit'); notify('Прайс очищен. Действие можно отменить'); });
+$('copyButton').addEventListener('click', copyToClipboard);
+$('pasteButton').addEventListener('click', pasteFromClipboard);
+$('pasteToolbarButton').addEventListener('click', pasteFromClipboard);
+$('openFileButton').addEventListener('click', () => $('fileInput').click());
+$('fileInput').addEventListener('change', async () => { await importFile($('fileInput').files[0]); $('fileInput').value = ''; });
+$('editor').addEventListener('dragover', event => { event.preventDefault(); $('editor').classList.add('drag-over'); });
+$('editor').addEventListener('dragleave', event => { if (!$('editor').contains(event.relatedTarget)) $('editor').classList.remove('drag-over'); });
+$('editor').addEventListener('drop', event => { event.preventDefault(); $('editor').classList.remove('drag-over'); importFile(event.dataTransfer.files[0]); });
+$('downloadButton').addEventListener('click', () => {
+    const blob = new Blob([$('inputText').value], {type: 'text/plain;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url; link.download = 'OneSecondPrice.txt'; document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    notify('Текстовый файл подготовлен');
+});
+$('demoButton').addEventListener('click', () => {
+    commitText('iPhone 15 128 Black 🇺🇸 55000\niPhone 16 Pro 256 White 🇯🇵 99000\niPhone 15 256 Blue 🇯🇵 62000\niPhone 16 128 Black 🇺🇸 70000\niPhone 16 Pro 128 Black 🇺🇸 90000\niPhone 16 256 Pink 🇯🇵 78000\niPhone 16 Pro Max 256 Black 🇺🇸 110000', 'Пример загружен');
+    $('documentLabel').textContent = 'Пример прайса';
+    notify('Попробуйте «Разбить по моделям»');
+});
+function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    $('themeIcon').setAttribute('href', theme === 'dark' ? '#i-sun' : '#i-moon');
+    $('themeToggle').setAttribute('aria-label', theme === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему');
+    document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#151d30' : '#edf1f8';
+}
+$('themeToggle').addEventListener('click', () => {
+    const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(theme);
+    try { localStorage.setItem('osp-theme', theme); } catch {}
+});
+try { if (localStorage.getItem('osp-theme') === 'dark') applyTheme('dark'); } catch {}
+updateUI();
+</script>
+</body>
+</html>
