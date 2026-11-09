@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#edf1f8">
 <meta name="color-scheme" content="light dark">
-<title>OneSecondPrice — прайс в одно касание</title>
+<title>OneSecondPrice — весь мир в твоих руках</title>
 <style>
 :root {
     --ink: #20293e; --muted: #69758c; --faint: #8490a5;
@@ -164,6 +164,23 @@ textarea::placeholder { color: var(--faint); }
 @media (max-width: 365px) { .shell { padding-left: 10px; padding-right: 10px; } .editor-header { padding-left: 10px; padding-right: 10px; } .tab { padding-left: 9px; padding-right: 9px; } .editor-actions .icon-button { width: 27px; } .toolbar-divider { display: none; } .editor-meta > span { display: none; } .live-label { font-size: 8px; } .counts { font-size: 8px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
 @supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) { .glass { background: #f6f8fd; } [data-theme="dark"] .glass { background: #232d45; } }
+
+/* Подписи файловых действий остаются видимыми и на телефоне. */
+#openFileButton { width: auto; gap: 7px; padding: 0 10px; font-size: 11px; white-space: nowrap; }
+#openFileButton svg { width: 16px; height: 16px; }
+@media (max-width: 720px) {
+    .editor-header { flex-wrap: wrap; gap: 12px; }
+    .editor-actions { width: 100%; }
+    #openFileButton { margin-right: auto; }
+    .file-extension, .copy-extra { display: none; }
+    .copy-button { font-size: 11px; gap: 7px; }
+}
+@media (max-width: 365px) {
+    .export-actions { gap: 6px; }
+    .secondary-button { padding-left: 8px; padding-right: 8px; }
+    .copy-button { padding-left: 7px; padding-right: 7px; }
+    .copy-button svg { display: none; }
+}
 </style>
 </head>
 <body>
@@ -195,14 +212,14 @@ textarea::placeholder { color: var(--faint); }
 <div class="ambient ambient-one" aria-hidden="true"></div><div class="ambient ambient-two" aria-hidden="true"></div>
 <div class="shell">
     <header class="topbar">
-        <div class="brand"><div class="brand-mark"><svg aria-hidden="true"><use href="#i-brand"/></svg></div><div><div class="brand-name">OneSecond<span>Price</span></div><div class="brand-caption">МЕНЬШЕ РУТИНЫ. БОЛЬШЕ ВРЕМЕНИ.</div></div></div>
+        <div class="brand"><div class="brand-mark"><svg aria-hidden="true"><use href="#i-brand"/></svg></div><div><div class="brand-name">OneSecond<span>Price</span></div><div class="brand-caption">РЕДАКТОР ПРАЙСОВ</div></div></div>
         <div class="top-actions"><span class="privacy"><svg aria-hidden="true"><use href="#i-lock"/></svg>Только на вашем устройстве</span><button class="icon-button theme-button" id="themeToggle" type="button" aria-label="Включить тёмную тему" title="Сменить тему"><svg aria-hidden="true"><use id="themeIcon" href="#i-moon"/></svg></button></div>
     </header>
     <main>
-        <section class="intro" aria-labelledby="pageTitle"><div><p class="eyebrow">ВАШЕ РАБОЧЕЕ ПРОСТРАНСТВО</p><h1 id="pageTitle">Прайс, готовый к отправке.</h1><p class="intro-description">Приведите текст в порядок. Обновите цены. Отправляйте.</p></div><div class="session-indicator"><span class="status-dot"></span>Всё готово к работе</div></section>
+        <section class="intro" aria-labelledby="pageTitle"><div><p class="eyebrow">ВАШЕ РАБОЧЕЕ ПРОСТРАНСТВО</p><h1 id="pageTitle">Весь мир в твоих руках</h1><p class="intro-description">Приведите текст в порядок. Обновите цены. Отправляйте.</p></div><div class="session-indicator"><span class="status-dot"></span>Всё готово к работе</div></section>
         <div class="workspace">
             <section class="editor glass" id="editor" aria-label="Редактор прайса">
-                <div class="editor-header"><div class="tabs" role="tablist" aria-label="Режим просмотра"><button class="tab" id="editTab" type="button" role="tab" aria-selected="true" aria-controls="editPanel" tabindex="0">Редактор</button><button class="tab" id="previewTab" type="button" role="tab" aria-selected="false" aria-controls="previewPanel" tabindex="-1">Результат</button></div><div class="editor-actions"><button class="icon-button" id="openFileButton" type="button" aria-label="Открыть текстовый файл" title="Открыть .txt"><svg aria-hidden="true"><use href="#i-upload"/></svg></button><span class="toolbar-divider"></span><button class="icon-button" id="undoButton" type="button" aria-label="Отменить действие" title="Отменить · Ctrl Z" disabled><svg aria-hidden="true"><use href="#i-undo"/></svg></button><button class="icon-button" id="redoButton" type="button" aria-label="Повторить действие" title="Повторить · Ctrl Shift Z" disabled><svg aria-hidden="true"><use href="#i-redo"/></svg></button><button class="icon-button" id="clearButton" type="button" aria-label="Очистить прайс" title="Очистить" disabled><svg aria-hidden="true"><use href="#i-trash"/></svg></button></div></div>
+                <div class="editor-header"><div class="tabs" role="tablist" aria-label="Режим просмотра"><button class="tab" id="editTab" type="button" role="tab" aria-selected="true" aria-controls="editPanel" tabindex="0">Редактор</button><button class="tab" id="previewTab" type="button" role="tab" aria-selected="false" aria-controls="previewPanel" tabindex="-1">Результат</button></div><div class="editor-actions"><button class="icon-button file-button" id="openFileButton" type="button" aria-label="Открыть прайс из файла .txt" title="Загрузить текстовый прайс с устройства"><svg aria-hidden="true"><use href="#i-upload"/></svg><span>Открыть .txt</span></button><span class="toolbar-divider"></span><button class="icon-button" id="undoButton" type="button" aria-label="Отменить действие" title="Отменить · Ctrl Z" disabled><svg aria-hidden="true"><use href="#i-undo"/></svg></button><button class="icon-button" id="redoButton" type="button" aria-label="Повторить действие" title="Повторить · Ctrl Shift Z" disabled><svg aria-hidden="true"><use href="#i-redo"/></svg></button><button class="icon-button" id="clearButton" type="button" aria-label="Очистить прайс" title="Очистить" disabled><svg aria-hidden="true"><use href="#i-trash"/></svg></button></div></div>
                 <div class="editor-meta"><span class="document-label"><svg aria-hidden="true"><use href="#i-file"/></svg><span id="documentLabel">Ваш прайс</span></span><span id="editorHint">Текст можно редактировать</span></div>
                 <div class="editor-well">
                     <div id="editPanel" role="tabpanel" aria-labelledby="editTab"><label for="inputText" hidden>Текст прайса</label><textarea id="inputText" aria-label="Текст прайса" spellcheck="false"></textarea><div class="empty-state" id="emptyState"><div class="paper-art" aria-hidden="true"><div class="paper-back"></div><div class="paper-front"><i></i><i></i><i></i><i></i></div><div class="paper-badge"><svg><use href="#i-plus"/></svg></div></div><h2>Начните с вашего прайса</h2><p>Вставьте текст или перетащите .txt файл.<br>Всё остальное — в пару касаний.</p><button class="paste-button" id="pasteButton" type="button"><svg aria-hidden="true"><use href="#i-clipboard"/></svg>Вставить из буфера</button><button class="demo-button" id="demoButton" type="button">Попробовать на примере</button></div></div>
@@ -222,9 +239,9 @@ textarea::placeholder { color: var(--faint); }
                 <button class="cleanup-button" type="button" data-operation="removeDots" title="Удалить все точки из текста"><svg aria-hidden="true"><use href="#i-eraser"/></svg>Удалить все точки</button>
             </aside>
         </div>
-        <div class="action-bar glass"><div class="action-info"><div class="ready-icon"><svg aria-hidden="true"><use href="#i-check"/></svg></div><div><div class="action-title" id="readyTitle">От текста до готового прайса</div><div class="action-subtitle" id="readySubtitle">Все изменения остаются в браузере</div></div></div><div class="export-actions"><button class="secondary-button" id="pasteToolbarButton" type="button" title="Вставить из буфера обмена"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span>Вставить</span></button><button class="secondary-button" id="downloadButton" type="button" disabled><svg aria-hidden="true"><use href="#i-download"/></svg><span>.txt</span></button><button class="primary-button copy-button" id="copyButton" type="button" disabled><svg aria-hidden="true"><use href="#i-copy"/></svg>Копировать прайс</button></div></div>
+        <div class="action-bar glass"><div class="action-info"><div class="ready-icon"><svg aria-hidden="true"><use href="#i-check"/></svg></div><div><div class="action-title" id="readyTitle">От текста до готового прайса</div><div class="action-subtitle" id="readySubtitle">Все изменения остаются в браузере</div></div></div><div class="export-actions"><button class="secondary-button" id="pasteToolbarButton" type="button" title="Вставить из буфера обмена"><svg aria-hidden="true"><use href="#i-clipboard"/></svg><span>Вставить</span></button><button class="secondary-button" id="downloadButton" type="button" title="Сохранить готовый прайс в файл .txt" aria-label="Сохранить прайс в файл .txt" disabled><svg aria-hidden="true"><use href="#i-download"/></svg><span>Сохранить<span class="file-extension"> .txt</span></span></button><button class="primary-button copy-button" id="copyButton" type="button" aria-label="Копировать прайс" disabled><svg aria-hidden="true"><use href="#i-copy"/></svg><span>Копировать<span class="copy-extra"> прайс</span></span></button></div></div>
     </main>
-    <footer class="page-footer"><span class="footer-wordmark">ONE SECOND. ALL SET.</span><span>Ваши данные не отправляются на сервер</span></footer>
+    <footer class="page-footer"><span class="footer-wordmark">ONESECONDPRICE</span><span>Ваши данные не отправляются на сервер</span></footer>
 </div>
 <input type="file" id="fileInput" accept=".txt,text/plain" hidden>
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -250,42 +267,141 @@ function formatText(text) {
 
 function getModelKey(line) {
     const normalized = line.normalize('NFKC').replace(/\s+/g, ' ').trim();
-    const iphone = normalized.match(/\biphone\s*(?:\d{1,2}(?:\s*e)?|xs|xr|x|se|air)(?:\s*(?:pro\s*max|pro|plus|mini|max|air))?\b/i);
+    const compact = value => value.toLowerCase().replace(/[\s-]+/g, '');
+    const year = () => (normalized.match(/\b(?:19|20)\d{2}\b/) || [''])[0];
+
+    // У часов размер корпуса, цвет, ремешок и артикул — варианты одной серии.
+    const watch = normalized.match(/\b(?:apple\s*)?watch\s*(?:(?:s|series)\s*(\d{1,2})|(se|ultra)(?:\s*([1-9]))?)(?![\p{L}\p{N}])/iu);
+    if (watch) {
+        return watch[1]
+            ? 'applewatch:s' + Number(watch[1])
+            : 'applewatch:' + watch[2].toLowerCase() + (watch[3] || '');
+    }
+
+    const iphone = normalized.match(/\biphone\s*(?:\d{1,2}(?:\s*e)?|xs|xr|x|se|air|duo)(?:\s*(?:pro\s*max|pro|plus|mini|max|air))?\b/i);
     if (iphone) {
-        let key = iphone[0].toLowerCase().replace(/\s+/g, '');
+        let key = compact(iphone[0]);
         if (key === 'iphonese') {
-            const year = normalized.slice(iphone.index + iphone[0].length)
+            const generationYear = normalized.slice(iphone.index + iphone[0].length)
                 .match(/^\s*\(?((?:19|20)\d{2})\)?/);
-            if (year) key += year[1];
+            if (generationYear) key += generationYear[1];
         }
         return key;
     }
 
-    // Для других моделей используем название до объёма памяти.
-    const storage = normalized.match(/\b(?:\d+\s*(?:gb|tb|гб|тб)\b|\d+\s*\/\s*\d+\b|(?:32|64|128|256|512|1024|2048)\b)/i);
-    if (storage) {
-        const model = normalized.slice(0, storage.index)
-            .replace(/^[^\p{L}\p{N}]+/u, '').trim();
-        if (/\p{L}/u.test(model)) return model.toLowerCase();
+    const airpods = normalized.match(/\bairpods\s*(?:(pro|max)(?:\s*(\d{1,2}))?|(\d{1,2}))(?![\p{L}\p{N}])/iu);
+    if (airpods) {
+        const family = (airpods[1] || 'standard').toLowerCase();
+        const generation = airpods[2] || airpods[3] || (family === 'max' ? year() : '');
+        const anc = family === 'standard' && /\banc\b/i.test(normalized) ? ':anc' : '';
+        return 'airpods:' + family + ':' + generation + anc;
     }
 
+    const ipad = normalized.match(/\bipad(?:\s+(pro|air|mini))?(?:\s+(\d{1,2}(?:[.,]\d)?))?(?=\s|$|[()])/i);
+    if (ipad) {
+        const chip = normalized.match(/\b[am]\d{1,2}\b/i);
+        return ['ipad', (ipad[1] || 'base').toLowerCase(), ipad[2] || '', chip ? compact(chip[0]) : year()].filter(Boolean).join(':');
+    }
+
+    const macbook = normalized.match(/\bmacbook(?:\s+(air|pro))?(?:\s+(\d{2}(?:[.,]\d)?))?(?=\s|$|[()])/i);
+    if (macbook) {
+        const chip = normalized.match(/\bm\d{1,2}(?:\s+(?:pro|max|ultra))?\b/i);
+        return ['macbook', (macbook[1] || 'base').toLowerCase(), macbook[2] || '', chip ? compact(chip[0]) : year()].filter(Boolean).join(':');
+    }
+
+    const dualsense = normalized.match(/\bdualsense(?:\s+(edge))?\b/i);
+    if (dualsense) return 'dualsense:' + (dualsense[1] ? 'edge' : 'standard');
+
+    const playstation = normalized.match(/\b(?:playstation\s*|ps\s*)([1-9])(?:\s*(pro|slim))?\b/i);
+    if (playstation) {
+        const edition = /\bdigital\b/i.test(normalized) ? 'digital' : /\bdis[ck]\b/i.test(normalized) ? 'disc' : 'unspecified';
+        return ['playstation', playstation[1], (playstation[2] || 'standard').toLowerCase(), edition].join(':');
+    }
+
+    const galaxy = normalized.match(/\b(?:samsung(?:\s+galaxy)?|galaxy)\s+([samf]\s*\d{1,3})(?:\s*(ultra|plus|fe|lite|\+))?(?![\p{L}\p{N}])/iu);
+    if (galaxy) {
+        const variant = (galaxy[2] || 'base').toLowerCase();
+        return 'galaxy:' + compact(galaxy[1]) + ':' + (variant === '+' ? 'plus' : variant);
+    }
+
+    const foldable = normalized.match(/\b(?:samsung\s+)?galaxy\s+(?:z\s*)?(fold|flip)\s*(\d{1,2})\b/i);
+    if (foldable) return 'galaxy:' + foldable[1].toLowerCase() + ':' + foldable[2];
+
+    const linkbuds = normalized.match(/\b(?:sony\s+)?linkbuds(?:\s+(fit|open|s))?\b/i);
+    if (linkbuds) {
+        const code = normalized.match(/\bwf-[a-z]{2}\d+[a-z]?\b/i);
+        return ['sony:linkbuds', (linkbuds[1] || 'base').toLowerCase(), code ? compact(code[0]) : ''].filter(Boolean).join(':');
+    }
+
+    const gopro = normalized.match(/\bgopro\s+(mission|hero|max)(?:\s*(\d{1,2}))?(?:\s+(mini))?\b/i);
+    if (gopro) return ['gopro', gopro[1].toLowerCase(), gopro[2] || '', gopro[3] || ''].filter(Boolean).join(':');
+
+    const jbl = normalized.match(/\bjbl\s+(flip|charge|xtreme|boombox|pulse|clip|go|partybox)\s*(\d{1,3})\b/i);
+    if (jbl) return 'jbl:' + jbl[1].toLowerCase() + ':' + jbl[2];
+
+    const pencil = normalized.match(/\b(?:apple\s+)?pencil(?:\s+(pro|usb\s*-\s*c|[1-3]))?(?![\p{L}\p{N}])/iu);
+    if (pencil) return 'pencil:' + (pencil[1] ? compact(pencil[1]) : 'standard');
+
+    const adapter = normalized.match(/\bapple\s+usb\s*-\s*c\s+(\d+(?:[.,]\d+)?)\s*w\b.*\badapter\b/i);
+    if (adapter) return 'apple:usbc:adapter:' + adapter[1].replace(',', '.') + 'w';
+
+    // Резервный формат: название до памяти, включая 12/1TB и 16/512.
+    const storage = normalized.match(/(?<![\p{L}\p{N}])(?:\d+\s*\/\s*\d+(?:[.,]\d+)?\s*(?:gb|tb|гб|тб)?|\d+(?:[.,]\d+)?\s*(?:gb|tb|гб|тб)|(?:32|64|128|256|512|1024|2048))(?![\p{L}\p{N}])/iu);
+    if (storage) {
+        const model = normalized.slice(0, storage.index).replace(/^[^\p{L}\p{N}]+/u, '').trim();
+        if (/\p{L}/u.test(model)) return model.toLowerCase();
+    }
     return null;
 }
 
-function groupByModel(text) {
-    const groups = new Map();
-    let unknownLine = 0;
-
-    for (const line of text.split(/\r?\n/)) {
-        if (!line.trim()) continue;
-        const model = getModelKey(line);
-        // Не объединяем нераспознанные строки и не удаляем их содержимое.
-        const key = model === null ? 'unknown:' + unknownLine++ : 'model:' + model;
-        if (!groups.has(key)) groups.set(key, []);
-        groups.get(key).push(line);
+function getProductRecords(text) {
+    const lines = text.split(/\r?\n/);
+    const records = [];
+    const isPriceLine = line => /^(?:(?:от\s+)?\d+\s*шт\.?\s*(?:->|→)\s*)?\.?\d+(?:[ \u00a0]\d{3})*(?:[.,]\d{1,2})?\.?(?:\s*(?:руб\.?|₽))*$/iu.test(line.trim());
+    for (let i = 0; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const recordLines = [lines[i]];
+        const model = getModelKey(lines[i]);
+        // В необработанном прайсе следующая строка цены остаётся при товаре.
+        let next = i + 1;
+        while (next < lines.length) {
+            if (!lines[next].trim()) { next++; continue; }
+            if (!isPriceLine(lines[next])) break;
+            recordLines.push(lines[next]);
+            i = next++;
+        }
+        records.push({model, text: recordLines.join('\n')});
     }
+    return records;
+}
 
-    return Array.from(groups.values(), lines => lines.join('\n')).join('\n\n');
+function groupByModel(text) {
+    const blocks = [];
+    const groups = new Map();
+    let unknownLines = [];
+    const flushGroups = () => {
+        for (const records of groups.values()) blocks.push(records.join('\n'));
+        groups.clear();
+    };
+    const flushUnknown = () => {
+        if (!unknownLines.length) return;
+        blocks.push(unknownLines.join('\n'));
+        unknownLines = [];
+    };
+    for (const record of getProductRecords(text)) {
+        if (record.model === null) {
+            // Неизвестные товары не разделяем построчно; заголовки сохраняют разделы.
+            flushGroups();
+            unknownLines.push(record.text);
+        } else {
+            flushUnknown();
+            if (!groups.has(record.model)) groups.set(record.model, []);
+            groups.get(record.model).push(record.text);
+        }
+    }
+    flushGroups();
+    flushUnknown();
+    return blocks.join('\n\n');
 }
 
 function addDotsToLastNumber(text) {
@@ -345,7 +461,7 @@ function updateUI(status) {
     $('previewPlaceholder').hidden = hasText;
     const lines = text.split(/\r?\n/).filter(line => line.trim());
     $('lineCount').textContent = lines.length;
-    $('modelCount').textContent = new Set(lines.map(getModelKey).filter(Boolean)).size;
+    $('modelCount').textContent = new Set(getProductRecords(text).map(record => record.model).filter(Boolean)).size;
     $('undoButton').disabled = !undoStack.length;
     $('redoButton').disabled = !redoStack.length;
     $('clearButton').disabled = !text.length;
